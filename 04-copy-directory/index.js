@@ -6,19 +6,17 @@ const filesPath = path.resolve(__dirname, "./files");
 const filesCopyPath = path.resolve(__dirname, "./files-copy");
 
 async function copyDir() {
-  await fs.access(filesCopyPath, (err) => {
-    if (err) {
-      fsPromises
-        .mkdir(filesCopyPath)
-        .then(function () {
-          console.log("Directory created successfully");
-        })
-        .catch(function () {
-          console.log("failed to create directory");
-        });
-    } else {
-      console.log("files-copy already exists");
-    }
+  await fs.mkdir(filesCopyPath, { recursive: true }, (err) => {
+    if (err) throw err;
+  });
+  
+  await fs.readdir(filesCopyPath, (err, files) => {
+    if (err) throw err;
+    files.forEach((file) => {
+      fs.unlink(path.join(filesCopyPath, file), (err) => {
+        if (err) throw err;
+      });
+    });
   });
 
   await fs.readdir(filesPath, { withFileTypes: true }, (err, files) => {
@@ -41,6 +39,7 @@ async function copyDir() {
       });
     }
   });
+
 }
 
 copyDir();
